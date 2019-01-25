@@ -21,8 +21,8 @@ if (cluster.isMaster) {
   };
   const onMessage = worker => payload => {
     //worked data
-    every(payload);
-    results.push(payload);
+    const mappedPayload = every(payload);
+    results.push(mappedPayload != null ? mappedPayload : payload);
     //next task
     askForTask(worker)
   };
