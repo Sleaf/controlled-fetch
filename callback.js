@@ -1,8 +1,8 @@
 module.exports = {
   every: (result) => {
-    console.log('做了：', result);
+    console.log('callback:', result);
   },
   all: (result) => {
-    console.log('做完了', result);
+    console.log('all finished', result);
   }
 };
