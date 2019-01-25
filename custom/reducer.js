@@ -1,4 +1,4 @@
 module.exports = async (task) => {
   //work content
-  return process.pid + ' finished.';
+  return `${process.pid}-finished: ${task}`;
 };
