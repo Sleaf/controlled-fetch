@@ -4,8 +4,8 @@
 
 
 ## 文件说明(所有文件均为导出对象)
-> * 文件单次执行：`task.js` `callback.js` 
-> * 文件多次执行(建议使用纯函数)：`reducer.js`
+> * 文件**单次**执行：`task.js` `callback.js` 
+> * 文件**多次**执行(建议使用纯函数)：`reducer.js`
 - **reducer.js**:
 ```javascript
 module.exports = function(task):Promise {
