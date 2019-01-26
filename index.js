@@ -23,33 +23,25 @@ if (cluster.isMaster) {
   const tasks = require('./custom/tasks');
   const { every, all } = require('./custom/callback');
   const results = [];
-  const askForTask = worker => {
-    if (tasks.length > 0) {
-      worker.send({
-        code: 200,
-        payload: tasks.shift(),
-      })
-    } else {
-      // worker.send({
-      //   code: 0,
-      // });
-      worker.disconnect();//todo remove
-      if (results.length > 0 && Object.keys(cluster.workers).length === 0) {
-        //all tasks finished
-        all(results);
-      }
-    }
-  };
+  const askForTask = worker => worker.send({
+    code: tasks.length > 0 ? 200 : 0,
+    payload: tasks.shift(),
+  });
   const onTaskFinished = worker => ({ code, payload }) => {
     switch (code) {
+      case 0:
+        worker.disconnect();
+        if (results.length > 0 && Object.keys(cluster.workers).length === 0) {
+          //all tasks finished
+          all(results);
+        }
+        return;
       case 100:
         return askForTask(worker);
       case 200:
         //worked data
         const mappedPayload = every(payload);
-        results.push(mappedPayload != null ? mappedPayload : payload);
-        //next task
-        return askForTask(worker);
+        return results.push(mappedPayload != null ? mappedPayload : payload);
       case 400:
         console.error(payload);
         return worker.disconnect();
@@ -66,18 +58,31 @@ if (cluster.isMaster) {
   * Worker process
   * codes will run many times!
   * */
+  const taskPool = Array(parallelNum).fill(false);
   const reducer = require('./custom/reducer');
+  const askTask = () => taskPool.some(i => !i) && process.send({ code: 100 });
   const onGetNewTask = ({ code, payload }) => {
     switch (code) {
       case 200:
-        return reducer(payload).then(
-          res => process.send({ code: 200, payload: res }),
-          err => process.send({ code: 400, payload: err })
+        const insertIndex = taskPool.indexOf(false);
+        taskPool[insertIndex] = reducer(payload).then(
+          res => {
+            taskPool[insertIndex] = false;
+            process.send({ code: 200, payload: res });
+            askTask();
+          },
+          err => {
+            taskPool[insertIndex] = false;
+            process.send({ code: 400, payload: err });
+            askTask();
+          },
         );
+        return askTask();
       case 0:
-      //wait for rest task and disconnect after all done.
+        //wait for rest task and disconnect after all done.
+        taskPool.every(i => !i) && process.send({ code: 0 });
     }
   };
-  process.send({ code: 100, payload: null });//get first task
+  askTask();//get first task
   process.on('message', onGetNewTask);
 }

@@ -27,7 +27,7 @@ module.exports = {
     //(Result)=>Any,  完成 **每次** 任务中resolve之后的值，如果有非null返回值将会被塞入最终结果
   },
   all:function(result:Array) {
-    //([Result])=>Any  完成 **所有** 任务之后的回调（不保证顺序）,[Result]为空则不调用
+    //([Result])=>Any  完成 **所有** 任务之后的回调（与every调用顺序一致）,[Result]为空则不调用
   },
 }
 ```
