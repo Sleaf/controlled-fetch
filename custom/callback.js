@@ -1,12 +1,11 @@
 module.exports = {
-  every: (result) => {
-    console.log('callback:', result);
+  every: (result, worker) => {
+    console.log('Callback:', result);
   },
   error: (err, worker) => {
-    console.error(err);
-    worker.disconnect();
+    console.error('Error:', err);
   },
   all: (result) => {
-    console.log('all finished', result);
+    console.log('All task finished:', result);
   }
 };
