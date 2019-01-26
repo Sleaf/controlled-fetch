@@ -23,11 +23,14 @@ module.exports = [
 - **/custom/callback.js**:
 ```javascript
 module.exports = {
-  every:function(result) {
-    //(Result)=>Any,  完成 **每次** 任务中resolve之后的值，如果有非null返回值将会被塞入最终结果
+  every:function(result,worker) {
+    //(Result,Worker)=>Any,  完成 **每次** 任务中resolve之后的值，如果有非null返回值将会被塞入最终结果,worker为执行任务的子进程
   },
-  all:function(result:Array) {
-    //([Result])=>Any  完成 **所有** 任务之后的回调（与every调用顺序一致）,[Result]为空则不调用
+  error:function(err,worker) {
+    //(Error,Worker)=>Any,  完成 **每次** 任务中reject之后的值，如果有非null返回值将会被塞入最终结果,，worker为执行任务的子进程
+  },
+  all:function(result:Array,errors:Array) {
+    //([Result],[Error])=>Any  完成 **所有** 任务之后的回调（与every调用顺序一致）,[Result]与[Error]均为空则不调用
   },
 }
 ```

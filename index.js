@@ -21,8 +21,8 @@ if (cluster.isMaster) {
   * codes will exec only once
   * */
   const tasks = require('./custom/tasks');
-  const { every, all } = require('./custom/callback');
-  const results = [];
+  const { every, error, all } = require('./custom/callback');
+  const results = [], errors = [];
   const askForTask = worker => worker.send({
     code: tasks.length > 0 ? 200 : 0,
     payload: tasks.shift(),
@@ -31,7 +31,7 @@ if (cluster.isMaster) {
     switch (code) {
       case 0:
         worker.disconnect();
-        if (results.length > 0 && Object.keys(cluster.workers).length === 0) {
+        if ((results.length > 0 || errors.length > 0) && Object.keys(cluster.workers).length === 0) {
           //all tasks finished
           all(results);
         }
@@ -40,11 +40,11 @@ if (cluster.isMaster) {
         return askForTask(worker);
       case 200:
         //worked data
-        const mappedPayload = every(payload);
+        const mappedPayload = every(payload, worker);
         return results.push(mappedPayload != null ? mappedPayload : payload);
       case 400:
-        console.error(payload);
-        return worker.disconnect();
+        const mappedError = error(payload, worker);
+        return errors.push(mappedError != null ? mappedError : payload);
       default:
     }
   };
