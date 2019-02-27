@@ -92,7 +92,7 @@ if (cluster.isMaster) {
             askTask();
           },
         );
-        return askTask();
+        break;
       case 0:
         //wait for rest task and disconnect after all done.
         taskPool.every(i => !i) && process.send({ code: 0 });
