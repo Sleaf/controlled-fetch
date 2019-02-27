@@ -20,13 +20,28 @@ if (cluster.isMaster) {
   * Master process
   * codes will exec only once
   * */
-  const tasks = require('./custom/tasks');
   const { every, error, all } = require('./custom/callback');
+  let tasks = require('./custom/tasks');
+  let askForTask;
+  if (Array.isArray(tasks)) {
+    /*task是一个简单数组*/
+    askForTask = worker => worker.send({
+      code: tasks.length > 0 ? 200 : 0,
+      payload: tasks.shift(),
+    });
+  } else if (tasks && tasks.next) {
+    /*task是一个可调用next方法的生成器*/
+    askForTask = worker => {
+      let nextValue = tasks.next();
+      return worker.send({
+        code: nextValue.done ? 0 : 200,
+        payload: nextValue.value,
+      });
+    }
+  } else {
+    throw new Error('Tasks should be [Array] or [Function*] !');
+  }
   const results = [], errors = [];
-  const askForTask = worker => worker.send({
-    code: tasks.length > 0 ? 200 : 0,
-    payload: tasks.shift(),
-  });
   const onTaskFinished = worker => ({ code, payload }) => {
     switch (code) {
       case 0:
