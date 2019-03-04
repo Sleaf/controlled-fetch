@@ -1,5 +1,6 @@
 const cluster = require('cluster');
 const { processNum, parallelNum } = require('./config');
+const { callbackPath, taskPath, reducerPath } = require('minimist')(process.argv);
 /*
 * 通讯结构:
 * master => worker
@@ -20,8 +21,8 @@ if (cluster.isMaster) {
   * Master process
   * codes will exec only once
   * */
-  const { every, error, all } = require('./custom/callback');
-  let tasks = require('./custom/tasks');
+  const { every, error, all } = require(callbackPath || './custom/callback');
+  let tasks = require(taskPath || './custom/tasks');
   let askForTask;
   if (Array.isArray(tasks)) {
     /*task是一个简单数组*/
@@ -74,7 +75,7 @@ if (cluster.isMaster) {
   * codes will run many times!
   * */
   const taskPool = Array(parallelNum).fill(false);
-  const reducer = require('./custom/reducer');
+  const reducer = require(reducerPath || './custom/reducer');
   const askTask = () => taskPool.some(i => !i) && process.send({ code: 100 });
   const onGetNewTask = ({ code, payload }) => {
     switch (code) {

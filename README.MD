@@ -1,7 +1,14 @@
 # Controlled fetch
 > 自用辣鸡爬虫基础设施
-- 采用`cluster`实现多进程并行
+- 采用 `cluster` / `Promise` 实现多进程并行并发
 
+## 支持执行参数附加文件
+```bash
+  node index.js  \
+  --callbackPath 'PATH_OF_YOUR_FILE' \ 
+  --taskPath 'PATH_OF_YOUR_FILE' \
+  --reducerPath 'PATH_OF_YOUR_FILE'
+```
 
 ## 文件说明(所有文件均为导出对象)
 > * 文件**单次**执行：`task.js` `callback.js` 
